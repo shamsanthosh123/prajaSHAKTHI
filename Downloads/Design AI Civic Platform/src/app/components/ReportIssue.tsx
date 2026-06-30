@@ -18,7 +18,7 @@ declare global {
 }
 
 // ── Gemini API key – put yours here or in .env ────────────────────────────────
-const GEMINI_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const GEMINI_KEY = "AIzaSyAfzrf_eQSHgZ8aPsrP5bSgvTuelZdk5wU";
 const GEMINI_URL =
   "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 // ── helpers ───────────────────────────────────────────────────────────────────

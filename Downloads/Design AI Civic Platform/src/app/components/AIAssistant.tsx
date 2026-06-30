@@ -7,6 +7,7 @@ import type { Complaint } from "../types";
 
 type Message = { role: "user" | "assistant"; content: string };
 const GEMINI_KEY = (import.meta as any).env?.VITE_GEMINI_API_KEY;
+console.log("Gemini Key:", GEMINI_KEY);
 
 // A clean, lightweight helper to render basic markdown elements safely
 function formatMarkdown(text: string) {
