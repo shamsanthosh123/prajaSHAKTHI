@@ -6,10 +6,7 @@ import { useLang } from "./LanguageContext";
 import type { Complaint } from "../types";
 
 type Message = { role: "user" | "assistant"; content: string };
-
-const GEMINI_KEY =
-  import.meta.env.VITE_GEMINI_API_KEY ??
-  "AQ.Ab8RN6JlVuNQYJRMMeQj3UX0-WBiLx1_t1ADfIHyJj1irjpEQw";
+const GEMINI_KEY = (import.meta as any).env?.VITE_GEMINI_API_KEY;
 
 // A clean, lightweight helper to render basic markdown elements safely
 function formatMarkdown(text: string) {

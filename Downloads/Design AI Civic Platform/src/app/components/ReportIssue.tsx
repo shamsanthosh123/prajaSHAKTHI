@@ -11,12 +11,14 @@ declare global {
   interface ImportMetaEnv {
     readonly VITE_GEMINI_API_KEY?: string;
   }
+
+  interface ImportMeta {
+    readonly env: ImportMetaEnv;
+  }
 }
 
 // ── Gemini API key – put yours here or in .env ────────────────────────────────
-const GEMINI_KEY =
-  import.meta.env.VITE_GEMINI_API_KEY ??
-  "AQ.Ab8RN6JlVuNQYJRMMeQj3UX0-WBiLx1_t1ADfIHyJj1irjpEQw";
+const GEMINI_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const GEMINI_URL =
   "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 // ── helpers ───────────────────────────────────────────────────────────────────
