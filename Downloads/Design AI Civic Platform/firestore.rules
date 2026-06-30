@@ -1,0 +1,86 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isSuperAdmin() {
+      return signedIn()
+        && (
+          request.auth.token.admin == true
+          || userDoc().role == "admin"
+          || userDoc().role == "super_admin"
+        );
+    }
+
+    function isDepartmentAdmin() {
+      return signedIn() && userDoc().role == "department_admin";
+    }
+
+    function isDepartmentUser() {
+      return isSuperAdmin() || isDepartmentAdmin();
+    }
+
+    function adminEmails() {
+      return ["admin@prajashakthi.in"];
+    }
+
+    match /users/{userId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.auth.uid == userId
+        && (
+          request.resource.data.role == "citizen"
+          || (
+            request.auth.token.email in adminEmails()
+            && request.resource.data.role in ["admin", "super_admin"]
+          )
+        );
+      allow update: if isSuperAdmin() || (
+        signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.role == resource.data.role
+        && (
+          resource.data.role == "citizen"
+          || isSuperAdmin()
+        )
+      );
+    }
+
+    match /complaints/{complaintId} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isDepartmentUser() || (
+        signedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == resource.data.userId
+        && request.resource.data.status == resource.data.status
+        && request.resource.data.get('assignedTo', '') == resource.data.get('assignedTo', '')
+        && request.resource.data.get('assignedOfficerId', '') == resource.data.get('assignedOfficerId', '')
+        && request.resource.data.get('adminNote', '') == resource.data.get('adminNote', '')
+        && request.resource.data.get('locationVerification', 'pending') == resource.data.get('locationVerification', 'pending')
+        && request.resource.data.get('internalNotes', []) == resource.data.get('internalNotes', [])
+        && request.resource.data.get('publicUpdates', []) == resource.data.get('publicUpdates', [])
+        && request.resource.data.get('timeline', []) == resource.data.get('timeline', [])
+      );
+    }
+
+    match /officers/{officerId} {
+      allow read: if isDepartmentUser();
+      allow create, update, delete: if isSuperAdmin() || isDepartmentAdmin();
+    }
+
+    match /notifications/{notificationId} {
+      allow read: if signedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isDepartmentUser();
+      allow update: if signedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["read"]);
+    }
+  }
+}
